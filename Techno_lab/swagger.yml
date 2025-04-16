@@ -1,0 +1,60 @@
+openapi: 3.0.0
+info:
+  title: "RP Flask REST API"
+  description: "An API about users"
+  version: "1.0.0"
+
+servers:
+  - url: "/api"
+
+components:
+  schemas:
+    User:
+      type: "object"
+      required:
+        - lname
+      properties:
+        fname:
+          type: "string"
+        lname:
+          type: "string"
+
+paths:
+  /users:
+    get:
+      operationId: "users.read_all"
+      tags:
+        - "Users"
+      summary: "Create a user"
+      requestBody:
+          description: "User to create"
+          required: True
+          content:
+            application/json:
+              schema:
+                x-body-name: "user"
+                $ref: "#/components/schemas/User"
+      responses:
+        "201":
+          description: "Successfully created user"
+
+  /workers:
+    get:
+      operationId: "workers.read_all"
+      tags:
+        - "Workers"
+      summary: "Read the list of workers"
+      responses:
+        "200":
+          description: "Successfully read workers list"
+
+  /services:
+    get:
+      operationId: "services.read_all"
+      tags:
+        - "Services"
+      summary: "Read the list of services"
+      responses:
+        "200":
+          description: "Successfully read services list"
+    
