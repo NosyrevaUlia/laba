@@ -91,6 +91,16 @@ paths:
         "204":
           description: "Successfully deleted user"
 
+  /workers:
+    get:
+      operationId: "workers.read_all"
+      tags:
+        - "Workers"
+      summary: "Read the list of workers"
+      responses:
+        "200":
+          description: "Successfully read workers list"
+
   /workers/{lname}:
     get:
       operationId: "workers.read_one"
