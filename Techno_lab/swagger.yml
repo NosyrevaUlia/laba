@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: "RP Flask REST API"
-  description: "An API about users"
+  description: "An API about users and workers"
   version: "1.0.0"
 
 servers:
@@ -18,6 +18,14 @@ components:
           type: "string"
         lname:
           type: "string"
+  parameters:
+    lname:
+      name: "lname"
+      description: "Last name of the user to get"
+      in: path
+      required: True
+      schema:
+        type: "string"
 
 paths:
   /users:
@@ -25,6 +33,14 @@ paths:
       operationId: "users.read_all"
       tags:
         - "Users"
+      summary: "Read the list of users"
+      responses:
+        "200":
+          description: "Successfully read users list"
+    post:
+      operationId: "users.create"
+      tags:
+        - Users
       summary: "Create a user"
       requestBody:
           description: "User to create"
@@ -37,16 +53,55 @@ paths:
       responses:
         "201":
           description: "Successfully created user"
-
-  /workers:
+  /users/{lname}:
     get:
-      operationId: "workers.read_all"
+      operationId: "users.read_one"
       tags:
-        - "Workers"
-      summary: "Read the list of workers"
+        - Users
+      summary: "Read one user"
+      parameters:
+        - $ref: "#/components/parameters/lname"
       responses:
         "200":
-          description: "Successfully read workers list"
+          description: "Successfully read user"
+    put:
+      tags:
+        - Users
+      operationId: "users.update"
+      summary: "Update a users"
+      parameters:
+        - $ref: "#/components/parameters/lname"
+      responses:
+        "200":
+          description: "Successfully updated user"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              x-body-name: "user"
+              $ref: "#/components/schemas/User"
+    delete:
+      tags:
+        - Users
+      operationId: "users.delete"
+      summary: "Delete a user"
+      parameters:
+        - $ref: "#/components/parameters/lname"
+      responses:
+        "204":
+          description: "Successfully deleted user"
+
+  /workers/{lname}:
+    get:
+      operationId: "workers.read_one"
+      tags:
+        - Workers
+      summary: "Read one worker"
+      parameters:
+        - $ref: "#/components/parameters/lname"
+      responses:
+        "200":
+          description: "Successfully read worker"
 
   /services:
     get:
