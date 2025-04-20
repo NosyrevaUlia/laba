@@ -68,7 +68,7 @@ paths:
       tags:
         - Users
       operationId: "users.update"
-      summary: "Update a users"
+      summary: "Update a user"
       parameters:
         - $ref: "#/components/parameters/lname"
       responses:
