@@ -2,8 +2,6 @@ from flask import render_template, Flask, jsonify, request
 from flask_jwt_extended import JWTManager  
 from sqlalchemy import Column, Integer, VARCHAR, Boolean, ForeignKey, TIMESTAMP, String
 from flask_sqlalchemy import SQLAlchemy
-from pydantic import BaseModel
-from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 import os
 from datetime import timedelta
@@ -11,22 +9,18 @@ from datetime import timedelta
 
 load_dotenv()
 
-HOSTNAME = "127.0.0.1"
-USERNAME = "root"
-PASSWORD = "tYHjhgfT67GVbj24"
-DB_NAME = "laba"
+
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOSTNAME}/{DB_NAME}'
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-#     'DATABASE_URI',
-#     f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOSTNAME}/{DB_NAME}')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET', 'super-secret-key')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+
 
 db = SQLAlchemy()
 jwt = JWTManager(app)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI', 'mysql+mysqlconnector://root:tYHjhgfT67GVbj24@localhost:3306/laba')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET', 'super-secret-key')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 
 #-------------------------Models--------------------------------------------------
 class User(db.Model):  
@@ -119,4 +113,4 @@ def create_worker():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

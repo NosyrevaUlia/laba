@@ -1,11 +1,13 @@
-# Указываем базовый образ
 FROM python:3.9
-# Копируем файлы проекта в рабочую директорию внутри контейнера
-COPY . /main
-# Устанавливаем зависимости
-WORKDIR /main
+COPY . /app
+WORKDIR /app
 RUN pip install -r requirements.txt
-# Экспортируем порт, на котором будет работать наше приложение
 EXPOSE 5000
-# Команда для запуска приложения
-CMD ["python", "main.py"]
+CMD ["flask", "run", "--host=0.0.0.0"]
+
+
+# FROM python:3.12
+# WORKDIR /app
+# COPY . .
+# RUN pip install -r requirements.txt
+# CMD ["flask", "run", "--host=0.0.0.0"]
