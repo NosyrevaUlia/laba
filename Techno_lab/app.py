@@ -1,28 +1,22 @@
-from flask import render_template, Flask, jsonify, request
-from flask_jwt_extended import JWTManager  
-from sqlalchemy import Column, Integer, VARCHAR, Boolean, ForeignKey, TIMESTAMP, String
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, VARCHAR, Boolean, ForeignKey, TIMESTAMP, String
 from dotenv import load_dotenv
 import os
 from datetime import timedelta
 
-
 load_dotenv()
 
-
-
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY', 'super-secret-key')
 
-
-db = SQLAlchemy()
-jwt = JWTManager(app)
-
+# Конфигурация базы данных
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI', 'mysql+mysqlconnector://root:tYHjhgfT67GVbj24@localhost:3306/laba')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET', 'super-secret-key')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 
-#-------------------------Models--------------------------------------------------
+db = SQLAlchemy(app)
+
+# Модели
 class User(db.Model):  
     __tablename__ = "users"
     id_user = db.Column(Integer, primary_key=True)
@@ -37,80 +31,130 @@ class Worker (db.Model):
     sername_worker = db.Column(VARCHAR(45))
     salary_worker = db.Column(Integer)
 
-
-db.init_app(app)
-
-#-------------------------Routers--------------------------------------------------
+# Маршруты для главной страницы и API
 @app.route('/')
 def index():
     return render_template("index.html")
 
-
 @app.route('/api')
-def home():
-    return render_template("home.html")
+def api():
+    return render_template("api.html")
 
+# Маршруты для работы с клиентами (User)
+@app.route('/users')
+def users():
+    all_users = User.query.all()
+    return render_template("users.html", users=all_users)
 
-@app.route('/users', methods=['GET'])
-def get_users():
+@app.route('/users/add', methods=['POST'])
+def add_user():
+    if request.method == 'POST':
+        name = request.form['name']
+        sername = request.form['sername']
+        
+        new_user = User(name_user=name, sername_user=sername)
+        db.session.add(new_user)
+        db.session.commit()
+        
+        flash('Клиент успешно добавлен')
+        return redirect(url_for('users'))
+
+@app.route('/users/update/<int:id>', methods=['GET', 'POST'])
+def update_user(id):
+    user = User.query.get_or_404(id)
+    
+    if request.method == 'POST':
+        user.name_user = request.form['name']
+        user.sername_user = request.form['sername']
+        db.session.commit()
+        
+        flash('Данные клиента обновлены')
+        return redirect(url_for('users'))
+    
+    return render_template("update_user.html", user=user)
+
+@app.route('/users/delete/<int:id>')
+def delete_user(id):
+    user = User.query.get_or_404(id)
+    db.session.delete(user)
+    db.session.commit()
+    
+    flash('Клиент удален')
+    return redirect(url_for('users'))
+
+# Маршруты для работы с работниками (Worker)
+@app.route('/workers')
+def workers():
+    all_workers = Worker.query.all()
+    return render_template("workers.html", workers=all_workers)
+
+@app.route('/workers/add', methods=['POST'])
+def add_worker():
+    if request.method == 'POST':
+        name = request.form['name']
+        sername = request.form['sername']
+        salary = request.form['salary']
+        
+        new_worker = Worker(name_worker=name, sername_worker=sername, salary_worker=salary)
+        db.session.add(new_worker)
+        db.session.commit()
+        
+        flash('Работник успешно добавлен')
+        return redirect(url_for('workers'))
+
+@app.route('/workers/update/<int:id>', methods=['GET', 'POST'])
+def update_worker(id):
+    worker = Worker.query.get_or_404(id)
+    
+    if request.method == 'POST':
+        worker.name_worker = request.form['name']
+        worker.sername_worker = request.form['sername']
+        worker.salary_worker = request.form['salary']
+        db.session.commit()
+        
+        flash('Данные работника обновлены')
+        return redirect(url_for('workers'))
+    
+    return render_template("update_worker.html", worker=worker)
+
+@app.route('/workers/delete/<int:id>')
+def delete_worker(id):
+    worker = Worker.query.get_or_404(id)
+    db.session.delete(worker)
+    db.session.commit()
+    
+    flash('Работник удален')
+    return redirect(url_for('workers'))
+
+# API endpoints
+@app.route('/api/users', methods=['GET'])
+def api_users():
     users = User.query.all()
-    user_list = []
-
+    output = []
     for user in users:
-        user_list.append({
+        user_data = {
             'id': user.id_user,
             'name': user.name_user,
             'sername': user.sername_user
-        })
+        }
+        output.append(user_data)
+    return jsonify({'users': output})
 
-    return jsonify(user_list)
-
-@app.route('/users', methods=['POST'])
-def create_user():
-    data = request.get_json()
-
-    new_user = User(
-        name_user=data['name'],
-        sername_user=data['sername']
-    )
-
-    db.session.add(new_user)
-    db.session.commit()
-
-    return jsonify({'message': 'User created successfully'}), 201
-
-
-@app.route('/workers', methods=['GET'])
-def get_workers():
+@app.route('/api/workers', methods=['GET'])
+def api_workers():
     workers = Worker.query.all()
-    worker_list = []
-
+    output = []
     for worker in workers:
-        worker_list.append({
+        worker_data = {
             'id': worker.id_worker,
             'name': worker.name_worker,
             'sername': worker.sername_worker,
             'salary': worker.salary_worker
-        })
-
-    return jsonify(worker_list)
-
-@app.route('/workers', methods=['POST'])
-def create_worker():
-    data = request.get_json()
-
-    new_worker = Worker(
-        name_worker=data['name'],
-        sername_worker=data['sername'],
-        salary_worker=data['salary']
-    )
-
-    db.session.add(new_worker)
-    db.session.commit()
-
-    return jsonify({'message': 'Worker created successfully'}), 201
-
-
+        }
+        output.append(worker_data)
+    return jsonify({'workers': output})
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()  # Создает таблицы, если они не существуют
     app.run(host='0.0.0.0', port=5000, debug=True)

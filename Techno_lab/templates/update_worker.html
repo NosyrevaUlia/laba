@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Изменить работника{% endblock %}
+
+{% block content %}
+<section class="update-worker">
+    <h2>Изменить данные работника</h2>
+    
+    <form action="{{ url_for('update_worker', id=worker.id_worker) }}" method="POST">
+        <div class="form-group">
+            <label for="name">Имя:</label>
+            <input type="text" id="name" name="name" value="{{ worker.name_worker }}" required>
+        </div>
+        <div class="form-group">
+            <label for="sername">Фамилия:</label>
+            <input type="text" id="sername" name="sername" value="{{ worker.sername_worker }}" required>
+        </div>
+        <div class="form-group">
+            <label for="salary">Зарплата:</label>
+            <input type="text" id="salary" name="salary" value="{{ worker.salary_worker }}" required>
+        </div>
+        <button type="submit" class="btn">Обновить</button>
+        <a href="{{ url_for('workers') }}" class="btn btn-cancel">Отмена</a>
+    </form>
+</section>
+{% endblock %}

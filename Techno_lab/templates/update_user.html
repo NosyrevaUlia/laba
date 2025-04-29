@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Изменить клиента{% endblock %}
+
+{% block content %}
+<section class="update-user">
+    <h2>Изменить данные клиента</h2>
+    
+    <form action="{{ url_for('update_user', id=user.id_user) }}" method="POST">
+        <div class="form-group">
+            <label for="name">Имя:</label>
+            <input type="text" id="name" name="name" value="{{ user.name_user }}" required>
+        </div>
+        <div class="form-group">
+            <label for="sername">Фамилия:</label>
+            <input type="text" id="sername" name="sername" value="{{ user.sername_user }}" required>
+        </div>
+        <button type="submit" class="btn">Обновить</button>
+        <a href="{{ url_for('users') }}" class="btn btn-cancel">Отмена</a>
+    </form>
+</section>
+{% endblock %}
